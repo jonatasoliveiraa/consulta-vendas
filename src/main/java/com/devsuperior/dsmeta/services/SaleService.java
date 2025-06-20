@@ -3,11 +3,14 @@ package com.devsuperior.dsmeta.services;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
+import com.devsuperior.dsmeta.dto.DateRange;
+import com.devsuperior.dsmeta.dto.SaleReportDTO;
 import com.devsuperior.dsmeta.dto.SaleSummaryDTO;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.devsuperior.dsmeta.dto.SaleMinDTO;
@@ -27,6 +30,16 @@ public class SaleService {
 	}
 
 	public List<SaleSummaryDTO> getSummary(String minDate, String maxDate){
+		DateRange range = verifySaleDates(minDate, maxDate);
+		return repository.getSaleSummary(range.getStartDate(), range.getEndDate());
+	}
+
+	public Page<SaleReportDTO> getReport(String minDate, String maxDate, String name, Pageable pageable){
+		DateRange range = verifySaleDates(minDate, maxDate);
+		return repository.getSaleReport(range.getStartDate(), range.getEndDate(), name, pageable);
+	}
+
+	private DateRange verifySaleDates(String minDate, String maxDate){
 		LocalDate startDate;
 		LocalDate endDate;
 
@@ -47,6 +60,7 @@ public class SaleService {
 			startDate = endDate.minusMonths(12L);
 		}
 
-		return repository.getSaleSummary(startDate, endDate);
+		return new DateRange(startDate, endDate);
 	}
+
 }
